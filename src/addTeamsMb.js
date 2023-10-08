@@ -1,19 +1,26 @@
 /*******************************************************************************
-Skryptozakładka: // Bookmarklet:
-Zbiorcze dodawanie użytkowników do MS Teams // Bulk Add Users to Microsoft Teams
+Bookmarklet: // Skryptozakładka:
+Bulk Add Users to Microsoft Teams // Zbiorcze dodawanie użytkowników do MS Teams
 *******************************************************************************/
 
 javascript: (() => { //https://www.freecodecamp.org/news/what-are-bookmarklets/
 
-  const dely=1000; //(ms) opóźnienie po dodaniu użytkownika 
-                   //(ms) delay after user added
-  const liSep=/[,;\s]+/; //(regexp) separator listy rozdzielonej przecinkami, średnikami i dowolnymi białymi znakami = \s, w tym nowego wiersza 
-                         //(regexp) separator of a list separated by commas, semicolons and any whitespace characters = \s, including newline
-  const uTst=/.@.../; //(regexp) wzorzec do walidacji - czyli @ i kilka dowolnych znaków dookoła 
-                      //(regexp) validation pattern - i.e. @ and a few arbitrary characters around it
-  const msgOpenW= '!\nNajpierw otwórz okno: Dodawanie członków do zespołu... \nFirst, open the window: Add members to team...';
-  const msgPrpt= 'Tu wklej listę członków: * Paste member list here:';
-  const msgCdnt= '!!\nNie można znaleźć/dodać:\nCould not find/add:\n!!\n';
+  const dely=1000; //(ms) delay after user added
+                   //(ms) opóźnienie po dodaniu użytkownika 
+  const liSep=/[,;\s]+/; //(regexp) separator of a list separated by commas, semicolons and any whitespace characters = \s, including newline
+                         //(regexp) separator listy rozdzielonej przecinkami, średnikami i dowolnymi białymi znakami = \s, w tym nowego wiersza 
+  const uTst=/.@.../; //(regexp) validation pattern - i.e. @ and a few arbitrary characters around it
+                      //(regexp) wzorzec do walidacji - czyli @ i kilka dowolnych znaków dookoła 
+  const lang=(document.documentElement.lang === "pl-pl") ? 1 : 0;   // lang=($('html').attr('lang') === "pl-pl") ? 1 : 0;
+  const msgOpenW= '!\n'+[
+    'On "teams.microsoft.com" open the window: Add members to team...',
+    'Na "teams.microsoft.com" otwórz okno: Dodawanie członków do zespołu...'][lang];
+  const msgPrpt= [
+    'Paste member list here:',
+    'Tu wklej listę członków:'][lang];
+  const msgCdnt= '!!\n'+[
+    'Could not find/add:',
+    'Nie można znaleźć/dodać:'][lang]+ '\n!!\n';
   const sInp='div.ts-people-picker input[data-tid="peoplePicker"]';
   const sDrop='div[data-tid="peoplepicker-dropdown"]';
   const sAdd='button.ts-btn[data-tid="createTeam-AddMembers"]';
@@ -24,7 +31,7 @@ javascript: (() => { //https://www.freecodecamp.org/news/what-are-bookmarklets/
     return new Promise((rslv, rjct) => {
       setTimeout(() => {
         // rjct(`err: $('${sel}')`) // to stop in catch(err){}
-        rslv( $('') );
+        rslv( $('') ); //just ignore 
       }, tmOut);
   //https://stackoverflow.com/questions/16149431/make-function-wait-until-element-exists#answer-53269990
       (async () => {
@@ -36,33 +43,31 @@ javascript: (() => { //https://www.freecodecamp.org/news/what-are-bookmarklets/
     });
   };
   
-  let $inp = $(sInp);
-  if (! $inp.length) {alert(msgOpenW); return;};
+  if (! ((window.jQuery) && $(sInp).length)) {alert(msgOpenW); return;};
   try {
     (async () => {
-      const users=prompt(msgPrpt).split(liSep);//Tu wklej listę członków // Paste member list here
+      const users=prompt(msgPrpt).split(liSep);// Paste member list here //Tu wklej listę członków
       for (const user of users) {
         if (uTst.test(user)) { console.log('====='+user);
-          await checkElem(sAdd,(sel)=> $(sel).prop('disabled')); //w gotowości do wpisywania, tj. [Add] 'disabled'
-                                                                 //ready to type, i.e. [Add] 'disabled'
-          $inp = $(sInp); $inp.focus().val(user); //pokazuje się tekst w <input>
-                                                  //text is shown in the <input>
-          $inp.change(); //zaraz pojawi się lista wyboru
-                         //a selection list is about to appear
+          await checkElem(sAdd,(sel)=> $(sel).prop('disabled')); //ready to type, i.e. [Add] 'disabled'
+                                                                 //w gotowości do wpisywania, tj. [Add] 'disabled'
+          let $inp = $(sInp); $inp.focus().val(user); //text is shown in the <input>
+                                                      //pokazuje się tekst w <input>
+          $inp.change(); //a selection list is about to appear
+                         //zaraz pojawi się lista wyboru
           let selDrop = await checkElem(sDrop,(sel)=>$(sel).text().trim(),7000);
           //console.log  ('selDrop= ',selDrop);
-          if (! selDrop.length) alert(msgCdnt + user);//'!! Nie można znaleźć/dodać: Could not find/add: !! ';
+          if (! selDrop.length) alert(msgCdnt + user);//'!! Could not find/add:  Nie można znaleźć/dodać: !! ';
           else {// ...text().trim() > ''
-            $(sInp).trigger({type: 'keydown', which: 9, keyCode: 9}); //naciśnięty [tab] -  przycisk [Dodaj] staje się niebieski
-                                                                      //pressed [tab] - the [Add] button becomes blue
+            $(sInp).trigger({type: 'keydown', which: 9, keyCode: 9}); //pressed [tab] - the [Add] button becomes blue
+                                                                      //naciśnięty [tab] -  przycisk [Dodaj] staje się niebieski
             let selAdd = await checkElem(sAdd,(sel)=>! $(sel).prop('disabled')); //! [Add] 'disabled'
             //console.log  ('selAdd= ',selAdd);
             if (! selAdd.length) alert(msgCdnt + user);
             else {
               selAdd.click();
-              $(sInp).focus(); //tak dla zabicia czasu //just to pass the time
-              await new Promise(rslv => setTimeout(rslv, dely)); //jeszcze więcej zabijania czasu
-                                                                 //even more time-killing
+              $(sInp).focus(); //just to pass the time //tak dla zabicia czasu
+              await new Promise(rslv => setTimeout(rslv, dely)); //even more time-killing //jeszcze więcej zabijania czasu
               await checkElem(sAdd,(sel)=> $(sel).prop('disabled')); //done - Add 'disabled'
             }
           }
