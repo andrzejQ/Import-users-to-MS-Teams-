@@ -4,17 +4,19 @@ Bulk Add Users to Microsoft Teams // Zbiorcze dodawanie użytkowników do MS Tea
 *******************************************************************************/
 
 javascript: (() => { //https://www.freecodecamp.org/news/what-are-bookmarklets/
-
-  const dely=1000; //(ms) delay after user added
-                   //(ms) opóźnienie po dodaniu użytkownika 
-  const liSep=/[,;\s]+/; //(regexp) separator of a list separated by commas, semicolons and any whitespace characters = \s, including newline
-                         //(regexp) separator listy rozdzielonej przecinkami, średnikami i dowolnymi białymi znakami = \s, w tym nowego wiersza 
-  const uTst=/.@.../; //(regexp) validation pattern - i.e. @ and a few arbitrary characters around it
-                      //(regexp) wzorzec do walidacji - czyli @ i kilka dowolnych znaków dookoła 
-  const lang=(document.documentElement.lang === "pl-pl") ? 1 : 0;   // lang=($('html').attr('lang') === "pl-pl") ? 1 : 0;
+//config.:
+const dely=1000;      // delay after user added
+        //(ms)        //pl: opóźnienie po dodaniu użytkownika 
+const liSep=/[,;\s]+/;// separator of a list separated by commas, semicolons 
+        //(regexp)    // and any whitespace characters = \s, including newline
+                      //pl: separator listy rozdzielonej przecinkami, średnikami 
+                      // i dowolnymi białymi znakami = \s, w tym nowego wiersza 
+const uTst=/.@.../;   // validation pattern - i.e. @ and a few arbitrary characters around it
+        //(regexp)    //pl: wzorzec do walidacji - czyli @ i kilka dowolnych znaków dookoła 
+  const lang=(document.documentElement.lang.startsWith('pl')) ? 1 : 0;   // lang=($('html').attr('lang').startsWith('pl')) ? 1 : 0;
   const msgOpenW= '!\n'+[
-    'On "teams.microsoft.com" open the window: Add members to team...',
-    'Na "teams.microsoft.com" otwórz okno: Dodawanie członków do zespołu...'][lang];
+    'On https://teams.microsoft.com\n'+'open the window: Add members to team...',
+    'Na https://teams.microsoft.com\n'+'otwórz okno: Dodawanie członków do zespołu...'][lang];
   const msgPrpt= [
     'Paste member list here:',
     'Tu wklej listę członków:'][lang];
